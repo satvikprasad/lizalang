@@ -1,0 +1,4 @@
+(executable
+ (public_name lizalang-backend)
+ (name main)
+ (libraries lizalang_backend dream dream_middleware_ext))
