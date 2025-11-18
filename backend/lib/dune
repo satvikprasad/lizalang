@@ -1,4 +1,3 @@
 (library
  (name lizalang_backend)
- (libraries
-   liza))
+ (libraries liza))
