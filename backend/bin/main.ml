@@ -56,7 +56,7 @@ let _cors_conf = Dream_middleware_ext.Cors.make_cors_conf
     ()
 
 let () = 
-    Dream.run
+    Dream.run ~interface:"0.0.0.0" ~port:(int_of_string (Sys.getenv "PORT"))
     @@ Dream.logger
     @@ Dream.router [   
         Dream.options "/run" (fun _ ->

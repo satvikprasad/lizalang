@@ -1,0 +1,42 @@
+name: heroku
+on:
+  push:
+    paths:
+    - 'backend/'
+    - .github/workflows/heroku.yml
+
+# Set this key on GitHub in your repository's Settings, tab Secrets. The key is
+# obtained by running locally
+#
+#   heroku login -i
+#   heroku authorizations:create
+env:
+  HEROKU_API_KEY: ${{secrets.HEROKU_API_KEY}}
+
+# Be sure to change or remove both cases of working-directory, and change the
+# app name from dream-example, to the name of your app.
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend/    
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: ocaml/setup-ocaml@v3
+      with:
+        ocaml-compiler: 5
+    - run: opam install . --deps-only --with-test
+    - run: opam exec -- dune build
+
+    - run: |
+        mkdir -p deploy
+        cp '_build/default/bin/main.exe' deploy/
+
+    - run: curl https://cli-assets.heroku.com/install.sh | sh
+    - run: |
+        heroku login -i
+        heroku buildpacks:set http://github.com/ryandotsmith/null-buildpack.git --app lizalang
+        heroku plugins:install heroku-builds
+        heroku builds:create --app lizalang
