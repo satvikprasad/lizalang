@@ -28,6 +28,7 @@ jobs:
       with:
         ocaml-compiler: 5
     - run: opam install . --deps-only --with-test
+    - run: opam install dream dream_middleware_ext
     - run: opam exec -- dune build
 
     - run: |
