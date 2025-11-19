@@ -1,3 +1,5 @@
 (lang dune 3.0)
 
 (pin (name liza) (url vendor/liza) (package (name liza) (version 1.0)))
+
+(vendored_dirs vendor)
