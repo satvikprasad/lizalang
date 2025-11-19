@@ -21,7 +21,7 @@ function App() {
             <div className='min-h-screen h-screen flex flex-col max-h-screen min-w-screen max-w-screen overflow-hidden'>
                 <div className='flex flex-row border-b-2 border-slate-100 p-3 items-center'>
                     <h1 className='text-xl! mr-auto'><a className='font-bold text-orange-600 hover:cursor-pointer hover:underline' href="https://www.github.com/satvikprasad/liza" target='_blank'>LizaLang</a> | A Dynamically Typed, Imperative Language Written in OCaml</h1>
-                    <h3>Supports closures, is yet to support recursion.</h3>
+                    <h3>Created by <a href="https://www.satvikprasad.com" className='hover:underline'>Satvik Prasad</a></h3>
                 </div>
                 <div className='flex flex-row flex-1'>
                     <div className='flex w-1/2 overflow-hidden'>
@@ -53,7 +53,11 @@ if true {
                         <div className='h-[70%] border-b-2 border-slate-100'>
                             <div className='flex flex-row w-full border-b-2 border-slate-100'>
                                 <button className='ml-auto p-2! rounded-none!' onClick={async () => {
-                                    const res = await fetch('http://localhost:8080/run', {
+                                    const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
+                                    const endpoint = `${backendUrl}/run`;
+
+                                    const res = await fetch(endpoint, {
                                         method: 'POST',
                                         headers: {
                                             'Content-Type': 'application/json'
