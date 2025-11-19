@@ -19,7 +19,7 @@
  (name lizalang-backend)
  (synopsis "A short synopsis")
  (description "A longer description")
- (depends ocaml liza dream dream_middleware_ext)
+ (depends ocaml dream dream_middleware_ext)
  (tags
   ("add topics" "to describe" your project)))
 

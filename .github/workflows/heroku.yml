@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: backend/    
+        working-directory: backend/
     steps:
     - uses: actions/checkout@v2
       with:
@@ -28,18 +28,24 @@ jobs:
 
     - uses: ocaml/setup-ocaml@v3
       with:
-        ocaml-compiler: 5
-    - run: opam install . --deps-only --with-test
+        ocaml-compiler: 5.2.1
+
+    - name: Build vendor projects
+      run: |
+        cd vendor/liza
+        opam install . --deps-only --with-test
+        opam exec -- dune build @install
+        cd ../..
+
     - run: opam install dream dream_middleware_ext
     - run: opam exec -- dune build
 
-    - run: |
+    - name: Copy build artifacts
+      run: |
         mkdir -p deploy
         cp '_build/default/bin/main.exe' deploy/
 
     - run: curl https://cli-assets.heroku.com/install.sh | sh
     - run: |
-        heroku login -i
-        heroku buildpacks:set http://github.com/ryandotsmith/null-buildpack.git --app lizalang
         heroku plugins:install heroku-builds
         heroku builds:create --app lizalang
