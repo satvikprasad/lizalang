@@ -4,6 +4,8 @@ import "./App.css";
 import { Editor, type OnMount } from "@monaco-editor/react";
 import { editor } from "monaco-editor";
 
+import { ArrowPathIcon } from "@heroicons/react/24/solid";
+
 type Expression =
     | {
           type: "literal";
@@ -151,7 +153,7 @@ const renderAST = (ast: Statement[]): React.JSX.Element => {
                 switch (expression.value.type) {
                     case "string":
                         return (
-                            <div className="outline-1 rounded-2xl p-3 w-full">
+                            <div className="outline-1 rounded-2xl p-3 w-full text-center">
                                 <p className="text-nowrap">
                                     "{expression.value.value}"
                                 </p>
@@ -159,7 +161,7 @@ const renderAST = (ast: Statement[]): React.JSX.Element => {
                         );
                     case "number":
                         return (
-                            <div className="outline-1 rounded-2xl p-3 w-full">
+                            <div className="outline-1 rounded-2xl p-3 w-full text-center">
                                 {expression.value.value}
                             </div>
                         );
@@ -311,7 +313,7 @@ const renderAST = (ast: Statement[]): React.JSX.Element => {
                 return (
                     <div className="flex flex-col gap-3">
                         <div className="text-center outline-1 rounded-2xl p-3">
-                            For
+                            for
                         </div>
                         <div className="flex flex-row gap-3">
                             {renderStatement(statement.children.initializer)}
@@ -407,6 +409,8 @@ function App() {
     const [output, setOutput] = useState<string>("");
     const [ast, setAst] = useState<Statement[] | null>(null);
 
+    const [loading, setLoading] = useState(false);
+
     return (
         <>
             <div className="min-h-screen h-screen flex flex-col max-h-screen min-w-screen max-w-screen overflow-hidden">
@@ -463,12 +467,16 @@ if true {
                             <div className="flex flex-row w-full border-b-2 border-slate-100 items-center pl-3">
                                 <p>Abstract Syntax Tree Viewer</p>
                                 <button
-                                    className="ml-auto p-2! rounded-none!"
+                                    className={`ml-auto p-2! w-25 ${loading ? "bg-red-600 text-white cursor-not-allowed" : "hover:cursor-pointer hover:bg-slate-100"} rounded-none!`}
                                     onClick={async () => {
+                                        if (loading) return;
+
                                         const backendUrl = import.meta.env
                                             .VITE_BACKEND_URL;
 
                                         const endpoint = `${backendUrl}/run`;
+
+                                        setLoading(true);
 
                                         const res = await fetch(endpoint, {
                                             method: "POST",
@@ -481,14 +489,18 @@ if true {
                                             }),
                                         });
 
+                                        setLoading(false);
+
                                         const out: InterpretedOutput =
                                             await res.json();
 
                                         setOutput(out.output);
                                         setAst(out.ast);
                                     }}
-                                >
-                                    Run Code
+                                >   
+                                    {
+                                        loading ? <ArrowPathIcon className="mx-auto h-5 animate-spin"/> : <>Run Code</>
+                                    }
                                 </button>
                             </div>
                             <div className="overflow-scroll font-mono max-h-full">
