@@ -2,7 +2,7 @@ name: heroku
 on:
   push:
     paths:
-    - 'backend/'
+    - '/'
     - .github/workflows/heroku.yml
 
 # Set this key on GitHub in your repository's Settings, tab Secrets. The key is
