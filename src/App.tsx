@@ -270,7 +270,7 @@ const renderAST = (ast: Statement[]): React.JSX.Element => {
                     <div className='mx-auto outline-1 rounded-2xl p-3'>
                         <p className='font-mono text-nowrap'>{"{ ... }"}</p>
                     </div>
-                    <div className='flex flex-row'>
+                    <div className='flex flex-row gap-3 items-start'>
                         {statement.children.map((s) => renderStatement(s))}
                     </div>
                 </div>;
