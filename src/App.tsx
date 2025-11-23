@@ -503,7 +503,7 @@ if true {
                                     }
                                 </button>
                             </div>
-                            <div className="overflow-scroll font-mono max-h-full">
+                            <div className="text-xs overflow-scroll font-mono max-h-full">
                                 {ast ? renderAST(ast) : <></>}
                             </div>
                         </div>
