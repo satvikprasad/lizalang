@@ -162,6 +162,7 @@ type InterpretedOutput = {
 };
 
 const renderAST = (ast: Statement[]): React.JSX.Element => {
+
     const renderExpression = (expression: Expression): React.JSX.Element => {
         switch (expression.type) {
             case "literal":
