@@ -8,138 +8,153 @@ import { ArrowPathIcon } from "@heroicons/react/24/solid";
 
 type Expression =
     | {
-          type: "literal";
+        type: "literal";
 
-          value:
-              | {
-                    type: "number";
-                    value: number;
-                }
-              | {
-                    type: "string";
-                    value: string;
-                }
-              | {
-                    type: "callable";
+        value:
+        | {
+            type: "number";
+            value: number;
+        }
+        | {
+            type: "string";
+            value: string;
+        }
+        | {
+            type: "callable";
 
-                    args: string[];
-                    captures: string[];
+            args: string[];
+            captures: string[];
 
-                    body: Statement;
-                }
-              | {
-                    type: "true";
-                    value: true;
-                }
-              | {
-                    type: "false";
-                    value: false;
-                };
-      }
+            body: Statement;
+        }
+        | {
+            type: "true";
+            value: true;
+        }
+        | {
+            type: "false";
+            value: false;
+        }
+        | {
+            type: "list";
+            value: Expression[];
+        };
+    }
     | {
-          type: "identifier";
-          value: string;
-      }
+        type: "identifier";
+        value: string;
+    }
     | {
-          type: "unary";
+        type: "unary";
 
-          value: {
-              operator: "!" | "-";
-              expression: Expression;
-          };
-      }
+        value: {
+            operator: "!" | "-";
+            expression: Expression;
+        };
+    }
     | {
-          type: "binary";
+        type: "binary";
 
-          value: {
-              left: Expression;
-              operator: "+" | "-" | "/" | "*" | ">" | "<" | ">=" | "<=";
-              right: Expression;
-          };
-      }
+        value: {
+            left: Expression;
+            operator: "+" | "-" | "/" | "*" | ">" | "<" | ">=" | "<=";
+            right: Expression;
+        };
+    }
     | {
-          type: "assignment";
+        type: "assignment";
 
-          value: {
-              identifier: string;
-              expression: Expression;
-          };
-      }
+        value: {
+            identifier: string;
+            expression: Expression;
+        };
+    }
     | {
-          type: "call";
-          value: {
-              callable: Expression;
-              args: Expression[];
-          };
-      }
+        type: "call";
+        value: {
+            callable: Expression;
+            args: Expression[];
+        };
+    }
     | {
-          type: "grouping";
-          value: {
-              expression: Expression;
-          };
-      };
+        type: "grouping";
+        value: {
+            expression: Expression;
+        };
+    }
+    | {
+        type: "index";
+        value: {
+            expression: Expression;
+            index: Expression;
+        }
+    };
 
 type Statement =
     | {
-          statement: "if";
+        statement: "if";
 
-          children: {
-              condition: Expression;
-              clause1: Statement;
-              clause2: Statement | null;
-          };
-      }
+        children: {
+            condition: Expression;
+            clause1: Statement;
+            clause2: Statement | null;
+        };
+    }
     | {
-          statement: "for";
+        statement: "for";
 
-          children: {
-              initializer: Statement;
-              increment: Expression;
-              condition: Expression;
-              body: Statement;
-          };
-      }
+        children: {
+            initializer: Statement;
+            increment: Expression;
+            condition: Expression;
+            body: Statement;
+        };
+    }
     | {
-          statement: "while";
+        statement: "while";
 
-          children: {
-              condition: Expression;
-              body: Statement;
-          };
-      }
+        children: {
+            condition: Expression;
+            body: Statement;
+        };
+    }
     | {
-          statement: "ret";
+        statement: "ret";
 
-          children: {
-              expression: Expression;
-          };
-      }
+        children: {
+            expression: Expression;
+        };
+    }
     | {
-          statement: "block";
+        statement: "block";
 
-          children: Statement[];
-      }
+        children: Statement[];
+    }
     | {
-          statement: "expression";
+        statement: "expression";
 
-          children: {
-              expression: Expression;
-          };
-      }
+        children: {
+            expression: Expression;
+        };
+    }
     | {
-          statement: "print";
+        statement: "print";
 
-          children: {
-              expression: Expression;
-          };
-      }
+        children: {
+            expression: Expression;
+        };
+    }
     | {
-          statement: "declaration";
-          children: {
-              variable: string;
-              expression: Expression;
-          };
-      };
+        statement: "declaration";
+        children: {
+            variable: string;
+            expression: Expression;
+        };
+    }
+    | {
+        statement: "raw_block";
+        children: null;
+    }
 
 type InterpretedOutput = {
     output: string;
@@ -224,6 +239,17 @@ const renderAST = (ast: Statement[]): React.JSX.Element => {
                                 False
                             </div>
                         );
+                    case "list":
+                        return <div className="flex flex-col gap-3">
+                            <div className="text-center outline-1 p-3 rounded-2xl font-mono">
+                                list
+                            </div>
+                            <div className="flex flex-row gap-3 items-start">
+                            {
+                                expression.value.value.map(expr => renderExpression(expr))
+                            }
+                            </div>
+                        </div>
                 }
             case "identifier":
                 return (
@@ -442,23 +468,63 @@ function App() {
                             height="100%"
                             width="100%"
                             defaultLanguage="liza"
-                            defaultValue={`// Rebind print
-var c = 0;
-var d = 0;
+                            defaultValue={`var unsorted = [
+    "satvik" 
+    "andrew" 
+    "ronnie" 
+    "banana"
+];
 
-// Capture c and d in closure
-var p = fn (s i)[c d] {
-    print i + 1 + ". " + s + " | " + (c = c + 1) + ", " + (d = d*d + 2/(c*c));
+// Capture stdlib functions: len, append
+var merge = fn (a b) [len append] {
+    var i = 0;
+    var j = 0;
+
+    var result = [];
+
+    while i < len (a) or j < len (b) {
+        if i >= len(a) {
+            result = append (result b[j]);
+            j = j + 1;
+
+        } else if j >= len(b) {
+            result = append (result a[i]);
+            i = i + 1;
+
+        } else if a[i] < b[j] {
+            result = append (result a[i]);
+            i = i + 1;
+        } else {
+            result = append (result b[j]);
+            j = j + 1;
+        }
+    }
+
+    ret result;
 };
 
-if true {
-    // Print 10 'Hello World!'
-    for var i = 0; i < 10; i = i + 2 {
-        p("Hello World!" i);
+// Capture stdlib functions: floor
+var merge_sort = fn (list start end)[floor] {
+    if end == start {
+        ret [list[start]];
     }
-} else if false {
-    print 5;
-}`}
+
+    if end < start {
+        ret [];
+    }
+
+    var mid = floor ((start + end) / 2);
+
+    var left = merge_sort (list start mid);
+    var right = merge_sort (list mid + 1 end);
+
+    ret merge (left right);
+};
+
+print "Sorted";
+print unsorted;
+print "INTO";
+print (merge_sort (unsorted 0 len(unsorted) - 1));`}
                             onMount={handleEditorOnMount}
                         />
                     </div>
@@ -494,12 +560,14 @@ if true {
                                         const out: InterpretedOutput =
                                             await res.json();
 
+                                        console.log(out);
+
                                         setOutput(out.output);
                                         setAst(out.ast);
                                     }}
-                                >   
+                                >
                                     {
-                                        loading ? <ArrowPathIcon className="mx-auto h-5 animate-spin"/> : <>Run Code</>
+                                        loading ? <ArrowPathIcon className="mx-auto h-5 animate-spin" /> : <>Run Code</>
                                     }
                                 </button>
                             </div>

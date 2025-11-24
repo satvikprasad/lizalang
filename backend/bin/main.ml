@@ -34,6 +34,10 @@ let rec construct_ast_json_from_expr (expression: Liza.Parser.expr) : Yojson.Bas
                 ("type", `String "nil");
                 ("value", `Null)
             ]
+            | Liza.Parser.List (items) -> `Assoc [
+                ("type", `String "list");
+                ("value", `List (List.map (fun item -> construct_ast_json_from_expr item) items))
+            ]
         )
     ]
     | Liza.Parser.Identifier id -> `Assoc [
@@ -77,6 +81,13 @@ let rec construct_ast_json_from_expr (expression: Liza.Parser.expr) : Yojson.Bas
             ("args", `List (List.map (fun arg ->
                 construct_ast_json_from_expr arg
             ) args))
+        ])
+    ]
+    | Liza.Parser.Index (expr, index) -> `Assoc [
+        ("type", `String "index");
+        ("value", `Assoc [
+            ("expression", construct_ast_json_from_expr expr);
+            ("index", construct_ast_json_from_expr index);
         ])
     ]
 
@@ -143,6 +154,10 @@ and construct_ast_json_from_stat (statement: Liza.Parser.statement) : Yojson.Bas
             ("expression", construct_ast_json_from_expr expr)
         ])
     ]
+    | RawBlock _ -> `Assoc [
+        ("statement", `String "raw_block");
+        ("children", `Null);
+    ]
 
 let rec construct_ast_json (statements: Liza.Parser.statement list) : Yojson.Basic.t = 
     match statements with 
@@ -182,6 +197,8 @@ let capture (func : unit -> 'a): string * 'a =
         raise e
 
 let run (source : string): Yojson.Basic.t option =
+    Liza.Parser.env_push_stl Liza.Parser.global_env;
+
     let tokens = Liza.Lexer.scan_tokens source in
     match Liza.Parser.parse_program tokens with
     | Ok (statements) -> (
@@ -198,7 +215,12 @@ let run (source : string): Yojson.Basic.t option =
             | Error (Liza.Parser.UncallableExpr expr) -> Printf.printf "UncallableExpr: Attempted to call expression %s that was not callable.\n" (Liza.Parser.pretty_print_expr expr)
 
             | Error (Liza.Parser.CapturedVariableNotExist var) -> Printf.printf "CapturedVariableNotExist: Can't capture non-existent variable %s\n" var
-            )) statements
+
+            | Error (Liza.Parser.IndexOutOfBounds (expr, index)) -> Printf.printf "IndexOutOfBounds: attempted to index %s at %d\n" (Liza.Parser.pretty_print_expr expr) index
+            | Error (Liza.Parser.NonIndexableLiteral lit) -> Printf.printf "NonIndexableLiteral: Cannot index literal %s" (Liza.Parser.pretty_print_expr (Literal (lit)))
+
+            | Error (Liza.Parser.InvalidIndex lit) -> Printf.printf "InvalidIndex: Cannot use %s as index" (Liza.Parser.pretty_print_expr (Literal lit))
+        )) statements
         );
         Some (construct_ast_json statements);
 
