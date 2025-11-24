@@ -245,9 +245,9 @@ const renderAST = (ast: Statement[]): React.JSX.Element => {
                                 list
                             </div>
                             <div className="flex flex-row gap-3 items-start">
-                            {
-                                expression.value.value.map(expr => renderExpression(expr))
-                            }
+                                {
+                                    expression.value.value.map(expr => renderExpression(expr))
+                                }
                             </div>
                         </div>
                 }
@@ -310,6 +310,16 @@ const renderAST = (ast: Statement[]): React.JSX.Element => {
                 );
             case "grouping":
                 return renderExpression(expression.value.expression);
+            case "index":
+                return <div className="flex flex-col gap-3">
+                    <div className="font-mono text-center outline-1 rounded-2xl p-3">
+                        index
+                    </div>
+                    <div className="flex flex-row gap-3 items-start">
+                        {renderExpression(expression.value.expression)}
+                        {renderExpression(expression.value.index)}
+                    </div>
+                </div>
         }
     };
 
@@ -410,6 +420,8 @@ const renderAST = (ast: Statement[]): React.JSX.Element => {
                         </div>
                     </div>
                 );
+            case "raw_block":
+                return <></>;
         }
     };
 
